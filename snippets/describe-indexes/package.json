@@ -1,0 +1,12 @@
+{
+  "name": "@mongosh/snippet-describe-indexes",
+  "snippetName": "describe-indexes",
+  "version": "1.0.0",
+  "description": "indexes(db.coll)",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "publishConfig": {
+    "access": "public"
+  }
+}

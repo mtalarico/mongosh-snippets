@@ -4,14 +4,15 @@
       throw new IndexDefError(`please provide a collection handle`);
     }
 
-    let indexes = coll.getIndexes();
+    let rawIndexes = coll.getIndexes();
+    let indexes = rawIndexes.filter((index) => index.name != "_id_");
     let dbName = db.getName();
     let collName = coll.getName();
 
     if (options.bulk == true) {
-      return getBulkDefsForColl(dbName, collName, indexes);
+      return makeBulkDefsForColl(dbName, collName, indexes);
     } else {
-      return getIndividualDefsForColl(dbName, collName, indexes);
+      return makeIndividualDefsForColl(dbName, collName, indexes);
     }
   };
 
@@ -22,26 +23,22 @@
     }
   }
 
-  function getBulkDefsForColl(dbName, collName, indexes) {
-    let cleaned = indexes.filter((index) => index.name != "_id_");
-    cleaned.forEach((index) => {
+  function makeBulkDefsForColl(dbName, collName, indexes) {
+    indexes.forEach((index) => {
       delete index.v;
       delete index.ns;
       return index;
     });
     return [
       `db.getSiblingDB("${dbName}").runCommand({createIndexes: "${collName}", indexes: ${EJSON.stringify(
-        cleaned
+        indexes
       )}})`,
     ];
   }
 
-  function getIndividualDefsForColl(dbName, collName, indexes) {
+  function makeIndividualDefsForColl(dbName, collName, indexes) {
     let cmds = [];
     indexes.forEach((index) => {
-      if (index.name == "_id_") {
-        return;
-      }
       let cmd = `db.getSiblingDB("${dbName}").getCollection("${collName}").createIndex(${EJSON.stringify(
         index.key
       )}`;
